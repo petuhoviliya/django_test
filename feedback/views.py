@@ -1,0 +1,63 @@
+from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth import authenticate, login, logout
+from django.core.urlresolvers import reverse
+from django.core.mail import send_mail
+
+# Create your views here.
+from .forms import LoginForm, MsgForm
+from .models import Messages
+def index_view(request):
+	if request.user.is_authenticated():
+		msg_form=MsgForm()
+		return render(request, 'feedback/index.html', {'form':msg_form})
+
+	else:
+		return HttpResponseRedirect(reverse('feedback:login'))
+	
+	
+def login_view(request):
+	if request.method == 'POST':
+		form = LoginForm(request.POST)
+		
+		if form.is_valid():			
+			user = authenticate(username=request.POST['username'], password=request.POST['password'])
+			
+			if user is not None:
+				
+				if user.is_active:
+					login(request, user)
+					return HttpResponseRedirect(reverse('feedback:index'),{'user': user})
+				else:
+					return HttpResponse('User is disabled')	
+			else:
+				return HttpResponse('Invalid login')
+		else:
+			return HttpResponse('Input data is invalid')	
+	else:
+		logon_form = LoginForm()
+		return render(request, 'feedback/login.html', {'form':logon_form})
+
+def logout_view(request):
+	logout(request)
+	return HttpResponseRedirect(reverse('feedback:index'))
+	
+
+def msg(request):
+	if request.method == 'POST':
+		if request.user.is_authenticated():
+			form=MsgForm(request.POST)
+			if form.is_valid():
+				
+				message=Messages(sender=form.cleaned_data['email'], text = form.cleaned_data['text'])
+				#send_mail('Message from user',form.cleaned_data['text'],form.cleaned_data['email'],['root@example.com'], fail_silently=False)
+				
+				message.save()
+				
+				return HttpResponse('Message sent')
+			else:
+				return HttpResponseRedirect(reverse('feedback:index'))
+	else:
+		return HttpResponseRedirect(reverse('feedback:index'))
+		
+	return HttpResponse(msg_block)

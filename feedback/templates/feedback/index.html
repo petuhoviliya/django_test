@@ -1,0 +1,19 @@
+Logged in as: {{ user }}
+<center>
+{{ form.non_field_errors }}
+<form action="{% url 'feedback:msg' %}" method="post">
+	{% csrf_token %}	
+{% for field in form %}
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }}<br>{{ field }}
+        {% if field.help_text %}
+        <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
+    </div>
+{% endfor %}
+	<input type="submit" value="Submit">
+</form>
+</center>
+ 
+

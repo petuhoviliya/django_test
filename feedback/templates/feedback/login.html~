@@ -1,0 +1,6 @@
+Please log in to continue
+<form action="{% url 'feedback:login' %}" method="post">
+	{% csrf_token %}
+	{{ form.as_table }}
+	<input type="submit" value="Log In">
+</form>
